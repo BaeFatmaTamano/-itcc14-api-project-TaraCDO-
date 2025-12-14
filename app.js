@@ -88,25 +88,47 @@ function getDirections(lat, lng) {
 // Geolocation button
 document.getElementById('locate-me').addEventListener('click', () => {
   if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        map.setView([latitude, longitude], 15);
-        if (currentLocationMarker) map.removeLayer(currentLocationMarker);
-        currentLocationMarker = L.marker([latitude, longitude]).addTo(map).bindPopup('You are here!').openPopup();
-      },
-      (error) => {
-        alert(`Geolocation failed: ${error.message} (code: ${error.code})`);
-        console.error('Geolocation error:', error);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0
-      }
-    );
+    try {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          map.setView([latitude, longitude], 15);
+          if (currentLocationMarker) map.removeLayer(currentLocationMarker);
+          currentLocationMarker = L.marker([latitude, longitude]).addTo(map).bindPopup('You are here!').openPopup();
+        },
+        (error) => {
+          let errorMessage = 'Geolocation failed: ';
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              errorMessage += 'You denied the request for Geolocation. Please allow location access in your browser settings and try again.';
+              break;
+            case error.POSITION_UNAVAILABLE:
+              errorMessage += 'Location information is unavailable. Please ensure your device\'s location services are enabled.';
+              break;
+            case error.TIMEOUT:
+              errorMessage += 'The request to get user location timed out. Please try again.';
+              break;
+            case error.UNKNOWN_ERROR:
+              errorMessage += 'An unknown error occurred. Please try again.';
+              break;
+            default:
+              errorMessage += `Error message: ${error.message} (code: ${error.code})`;
+          }
+          alert(errorMessage);
+          console.error('Geolocation error:', error);
+        },
+        {
+          enableHighAccuracy: false, // Changed from true to false
+          timeout: 10000,
+          maximumAge: 0
+        }
+      );
+    } catch (e) {
+      alert(`An unexpected error occurred while trying to get your location: ${e.message}`);
+      console.error('Unexpected Geolocation API error:', e);
+    }
   } else {
-    alert('Geolocation not supported.');
+    alert('Geolocation not supported by this browser.');
   }
 });
 

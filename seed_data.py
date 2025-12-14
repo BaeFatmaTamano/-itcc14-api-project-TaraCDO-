@@ -7,7 +7,7 @@ from pymongo import MongoClient
 
 # Connect to MongoDB
 client = MongoClient("mongodb://localhost:27017/")
-db = client["taracdo_db"]
+db = client["taraCDO"]
 collection = db["establishments"]
 
 # Sample places data for Cagayan de Oro City
